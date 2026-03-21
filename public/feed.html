@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>☕ The Friend's Feed</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        header p {
+            opacity: 0.9;
+        }
+        .refresh-btn {
+            background: white;
+            color: #764ba2;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s;
+        }
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+        .feed-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .feed-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-right: 12px;
+        }
+        .meta {
+            flex: 1;
+        }
+        .name {
+            font-weight: 600;
+            color: #333;
+        }
+        .time {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        .gossip-text {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            margin-bottom: 10px;
+        }
+        .source {
+            font-size: 0.9rem;
+            color: #667eea;
+            text-decoration: none;
+        }
+        .source:hover {
+            text-decoration: underline;
+        }
+        .empty {
+            text-align: center;
+            color: white;
+            padding: 40px;
+            opacity: 0.8;
+        }
+        .loading {
+            text-align: center;
+            color: white;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>☕ The Friend</h1>
+            <p>Your casual news companion</p>
+            <button class="refresh-btn" onclick="loadFeed()">🔄 Refresh Feed</button>
+        </header>
+        
+        <div id="feed-container">
+            <div class="loading">Loading... ☕</div>
+        </div>
+    </div>
+
+    <script>
+        async function loadFeed() {
+            const container = document.getElementById('feed-container');
+            container.innerHTML = '<div class="loading">Loading... ☕</div>';
+            
+            try {
+                const response = await fetch('/api/friend/feed');
+                const data = await response.json();
+                
+                if (!data.success || data.feed.length === 0) {
+                    container.innerHTML = '<div class="empty">No gossip yet. The Friend is checking the news... ☕</div>';
+                    return;
+                }
+                
+                container.innerHTML = data.feed.map(item => {
+                    const date = new Date(item.timestamp).toLocaleString();
+                    const link = item.originalNews?.link || '#';
+                    return `
+                        <div class="feed-item">
+                            <div class="feed-header">
+                                <div class="avatar">☕</div>
+                                <div class="meta">
+                                    <div class="name">The Friend</div>
+                                    <div class="time">${date}</div>
+                                </div>
+                            </div>
+                            <div class="gossip-text">${escapeHtml(item.gossip)}</div>
+                            <a href="${link}" target="_blank" class="source">🔗 Read original →</a>
+                        </div>
+                    `;
+                }).join('');
+                
+            } catch (error) {
+                container.innerHTML = `<div class="empty">Error loading feed: ${error.message}</div>`;
+            }
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        // Load on page load
+        loadFeed();
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadFeed, 30000);
+    </script>
+</body>
+</html>

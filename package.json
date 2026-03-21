@@ -1,0 +1,20 @@
+{
+  "name": "hackathon0321",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test": "node test-gossip.js",
+    "demo": "node -e \"console.log('\\n☕ Starting The Friend demo...\\n'); setTimeout(() => require('./server.js'), 1000)\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "hyperspell": "^0.35.0"
+  }
+}
